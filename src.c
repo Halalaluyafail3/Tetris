@@ -329,7 +329,8 @@ int main(void) {
   srandom((unsigned)Start.tv_sec * 1000 + (unsigned)(Start.tv_nsec / 1000000));
   if (signal(SIGINT, QuitSignal) == SIG_ERR ||
       signal(SIGTERM, QuitSignal) == SIG_ERR ||
-      signal(SIGQUIT, QuitSignal) == SIG_ERR || signal(SIGTSTP, QuitSignal)) {
+      signal(SIGQUIT, QuitSignal) == SIG_ERR ||
+      signal(SIGTSTP, QuitSignal) == SIG_ERR) {
     return EXIT_FAILURE;
   }
   atexit(Clean);
