@@ -71,8 +71,10 @@ void Clean(void) {
 volatile sig_atomic_t ShouldQuit;
 void QuitSignal(int Signal) { ShouldQuit = 1; }
 void StaticText(void) {
-  printf("\e[1;%iHr = restart\e[2;%iH^C = quit\e[H", WIDTH * 2 + 4,
-         WIDTH * 2 + 4);
+  printf("\e[1;%iHa = left\e[2;%iHd = right\e[3;%iHs = soft drop\e[4;%iHw = "
+         "rotate\e[5;%iHr = restart\e[6;%iH^C = quit\e[H",
+         WIDTH * 2 + 4, WIDTH * 2 + 4, WIDTH * 2 + 4, WIDTH * 2 + 4,
+         WIDTH * 2 + 4, WIDTH * 2 + 4);
   for (int Row = 0; Row < HEIGHT; ++Row) {
     printf("|\e[%iC|\e[1E", WIDTH * 2);
   }
@@ -93,6 +95,12 @@ void Draw(void) {
   }
   printf("\e[48;5;0m\e[%i;8H%zu\e[%i;8H%zu\e[%i;8H%zu", HEIGHT + 2, Score,
          HEIGHT + 3, Level, HEIGHT + 4, Lines);
+}
+void SetColor(int Color) {
+  Game[*Rows][*Columns] = Color;
+  Game[Rows[1]][Columns[1]] = Color;
+  Game[Rows[2]][Columns[2]] = Color;
+  Game[Rows[3]][Columns[3]] = Color;
 }
 bool CreatePiece(Piece Creating) {
   int Row1 = 0;
@@ -115,22 +123,13 @@ bool CreatePiece(Piece Creating) {
   Columns[1] = Column2;
   Columns[2] = Column3;
   Columns[3] = Column4;
-  Game[Row1][Column1] = SELECTED_COLOR;
-  Game[Row2][Column2] = SELECTED_COLOR;
-  Game[Row3][Column3] = SELECTED_COLOR;
-  Game[Row4][Column4] = SELECTED_COLOR;
   Active = Creating;
+  SetColor(SELECTED_COLOR);
   return 0;
 }
 bool IsFilled(int Color) { return Color && Color <= MAX_COLOR; }
 bool IsGrounded(int Row, int Column) {
   return Row == HEIGHT - 1 || IsFilled(Game[Row + 1][Column]);
-}
-void SetColor(int Color) {
-  Game[*Rows][*Columns] = Color;
-  Game[Rows[1]][Columns[1]] = Color;
-  Game[Rows[2]][Columns[2]] = Color;
-  Game[Rows[3]][Columns[3]] = Color;
 }
 void MovePiece(void) {
   if (IsGrounded(*Rows, *Columns) || IsGrounded(Rows[1], Columns[1]) ||
