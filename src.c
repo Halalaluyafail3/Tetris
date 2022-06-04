@@ -41,9 +41,9 @@ N = nothing
 */
 enum Piece { PC_L, PC_J, PC_O, PC_I, PC_S, PC_Z, PC_T, PC_N };
 typedef enum Piece Piece;
-int Offsets[PC_N][6] = {0, -1, 0, 1,  1, -1, 0, -1, 0, 1,  1, 1, 0, 1,
-                        1, 0,  1, 1,  0, -1, 0, 1,  0, 2,  0, 1, 1, 0,
-                        1, -1, 0, -1, 1, 0,  1, 1,  0, -1, 0, 1, 1, 0};
+static int Offsets[PC_N][6] = {0, -1, 0, 1,  1, -1, 0, -1, 0, 1,  1, 1, 0, 1,
+                               1, 0,  1, 1,  0, -1, 0, 1,  0, 2,  0, 1, 1, 0,
+                               1, -1, 0, -1, 1, 0,  1, 1,  0, -1, 0, 1, 1, 0};
 static Piece Active = PC_N;
 static int Rows[4];
 static int Columns[4];
@@ -51,26 +51,26 @@ static int NextColor = 1;
 static size_t Score;
 static size_t Level = 1;
 static size_t Lines;
-int Game[HEIGHT][WIDTH];
-void AddScore(size_t Amt) {
+static int Game[HEIGHT][WIDTH];
+static void AddScore(size_t Amt) {
   Score = Score > SIZE_MAX - Amt ? SIZE_MAX : Score + Amt;
   Level = Score >= 123000 ? 42 : Score / 3000 + 1;
 }
-void Hide(void) {
+static void Hide(void) {
   PRINT("\e[?1049h\e[?25l");
   if (isatty(STDIN_FILENO)) {
     system("stty -echo -icanon time 0 min 0");
   }
 }
-void Clean(void) {
+static void Clean(void) {
   PRINT("\e[?1049l\e[?25h");
   if (isatty(STDIN_FILENO)) {
     system("stty sane");
   }
 }
-volatile sig_atomic_t ShouldQuit;
-void QuitSignal(int Signal) { ShouldQuit = 1; }
-void StaticText(void) {
+static volatile sig_atomic_t ShouldQuit;
+static void QuitSignal(int Signal) { ShouldQuit = 1; }
+static void StaticText(void) {
   printf("\e[1;%iHa = left\e[2;%iHd = right\e[3;%iHs = soft drop\e[4;%iHw = "
          "rotate\e[5;%iHr = restart\e[6;%iH^C = quit\e[H",
          WIDTH * 2 + 4, WIDTH * 2 + 4, WIDTH * 2 + 4, WIDTH * 2 + 4,
@@ -84,7 +84,7 @@ void StaticText(void) {
   }
   PRINT("+\e[1EScore:\e[1ELevel:\e[1ELines:");
 }
-void Draw(void) {
+static void Draw(void) {
   for (int Row = 0; Row < HEIGHT; ++Row) {
     printf("\e[%zu;2H", Row + 1);
     int *Displaying = Game[Row];
@@ -96,13 +96,13 @@ void Draw(void) {
   printf("\e[48;5;0m\e[%i;8H%zu\e[%i;8H%zu\e[%i;8H%zu", HEIGHT + 2, Score,
          HEIGHT + 3, Level, HEIGHT + 4, Lines);
 }
-void SetColor(int Color) {
+static void SetColor(int Color) {
   Game[*Rows][*Columns] = Color;
   Game[Rows[1]][Columns[1]] = Color;
   Game[Rows[2]][Columns[2]] = Color;
   Game[Rows[3]][Columns[3]] = Color;
 }
-bool CreatePiece(Piece Creating) {
+static bool CreatePiece(Piece Creating) {
   int Row1 = 0;
   int Column1 = 4;
   int Row2 = Row1 + *Offsets[Creating];
@@ -127,11 +127,11 @@ bool CreatePiece(Piece Creating) {
   SetColor(SELECTED_COLOR);
   return 0;
 }
-bool IsFilled(int Color) { return Color && Color <= MAX_COLOR; }
-bool IsGrounded(int Row, int Column) {
+static bool IsFilled(int Color) { return Color && Color <= MAX_COLOR; }
+static bool IsGrounded(int Row, int Column) {
   return Row == HEIGHT - 1 || IsFilled(Game[Row + 1][Column]);
 }
-void MovePiece(void) {
+static void MovePiece(void) {
   if (IsGrounded(*Rows, *Columns) || IsGrounded(Rows[1], Columns[1]) ||
       IsGrounded(Rows[2], Columns[2]) || IsGrounded(Rows[3], Columns[3])) {
     SetColor(NextColor);
@@ -175,10 +175,10 @@ void MovePiece(void) {
   Rows[3] += 1;
   SetColor(SELECTED_COLOR);
 }
-bool CantMoveLeft(int Row, int Column) {
+static bool CantMoveLeft(int Row, int Column) {
   return !Column || IsFilled(Game[Row][Column - 1]);
 }
-void MoveLeft(void) {
+static void MoveLeft(void) {
   if (CantMoveLeft(*Rows, *Columns) || CantMoveLeft(Rows[1], Columns[1]) ||
       CantMoveLeft(Rows[2], Columns[2]) || CantMoveLeft(Rows[3], Columns[3])) {
     return;
@@ -190,10 +190,10 @@ void MoveLeft(void) {
   Columns[3] -= 1;
   SetColor(SELECTED_COLOR);
 }
-bool CantMoveRight(int Row, int Column) {
+static bool CantMoveRight(int Row, int Column) {
   return Column == WIDTH - 1 || IsFilled(Game[Row][Column + 1]);
 }
-void MoveRight(void) {
+static void MoveRight(void) {
   if (CantMoveRight(*Rows, *Columns) || CantMoveRight(Rows[1], Columns[1]) ||
       CantMoveRight(Rows[2], Columns[2]) ||
       CantMoveRight(Rows[3], Columns[3])) {
@@ -206,11 +206,11 @@ void MoveRight(void) {
   Columns[3] += 1;
   SetColor(SELECTED_COLOR);
 }
-bool CantMoveTo(int Row, int Column) {
+static bool CantMoveTo(int Row, int Column) {
   return Row < 0 || Column < 0 || Row >= HEIGHT || Column >= WIDTH ||
          IsFilled(Game[Row][Column]);
 }
-void Rotate(void) {
+static void Rotate(void) {
   int Rows1 = *Rows + Columns[1] - *Columns;
   int Columns1 = *Columns + *Rows - Rows[1];
   int Rows2 = *Rows + Columns[2] - *Columns;
@@ -230,10 +230,10 @@ void Rotate(void) {
   Columns[3] = Columns3;
   SetColor(SELECTED_COLOR);
 }
-long GetInterval(void) {
+static long GetInterval(void) {
   return 900000000 - 50000000L * (Level < 18 ? Level - 1 : 17);
 }
-void Play(void) {
+static void Play(void) {
   struct timespec Before;
   clock_gettime(CLOCK_MONOTONIC, &Before);
   for (;;) {
