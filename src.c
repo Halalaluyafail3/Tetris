@@ -344,8 +344,7 @@ int main(void) {
     if (ShouldQuit) {
       return EXIT_SUCCESS;
     }
-    for (int Input;
-         (Input = getchar()) != EOF || !feof(stdin) && !ferror(stdin);)
+    while (getchar() != EOF || !feof(stdin) && !ferror(stdin))
       ;
     Play();
     PRINT("\e[2J");
