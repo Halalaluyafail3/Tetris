@@ -8,7 +8,7 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
-#define Print(Str) fputs(Str, stdout)
+#define PRINT(Str) fputs(Str, stdout)
 #define WIDTH 10
 #define HEIGHT 20
 #define MAX_COLOR 14
@@ -57,13 +57,13 @@ void AddScore(size_t Amt) {
   Level = Score >= 123000 ? 42 : Score / 3000 + 1;
 }
 void Hide(void) {
-  Print("\e[?1049h\e[?25l");
+  PRINT("\e[?1049h\e[?25l");
   if (isatty(STDIN_FILENO)) {
     system("stty -echo -icanon time 0 min 0");
   }
 }
 void Clean(void) {
-  Print("\e[?1049l\e[?25h");
+  PRINT("\e[?1049l\e[?25h");
   if (isatty(STDIN_FILENO)) {
     system("stty sane");
   }
@@ -80,9 +80,9 @@ void StaticText(void) {
   }
   putchar('+');
   for (int Column = 0; Column < WIDTH; ++Column) {
-    Print("--");
+    PRINT("--");
   }
-  Print("+\e[1EScore:\e[1ELevel:\e[1ELines:");
+  PRINT("+\e[1EScore:\e[1ELevel:\e[1ELines:");
 }
 void Draw(void) {
   for (int Row = 0; Row < HEIGHT; ++Row) {
@@ -348,7 +348,7 @@ int main(void) {
          (Input = getchar()) != EOF || !feof(stdin) && !ferror(stdin);)
       ;
     Play();
-    Print("\e[2J");
+    PRINT("\e[2J");
     NextColor = 1;
     Level = 1;
     Score = Lines = 0;
