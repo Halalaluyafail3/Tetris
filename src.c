@@ -39,12 +39,21 @@ T ###
 N = nothing
 
 */
-enum Piece { PC_L, PC_J, PC_O, PC_I, PC_S, PC_Z, PC_T, PC_N };
+enum Piece {
+  PIECE_L,
+  PIECE_J,
+  PIECE_O,
+  PIECE_I,
+  PIECE_S,
+  PIECE_Z,
+  PIECE_T,
+  PIECE_N
+};
 typedef enum Piece Piece;
-static int Offsets[PC_N][6] = {0, -1, 0, 1,  1, -1, 0, -1, 0, 1,  1, 1, 0, 1,
-                               1, 0,  1, 1,  0, -1, 0, 1,  0, 2,  0, 1, 1, 0,
-                               1, -1, 0, -1, 1, 0,  1, 1,  0, -1, 0, 1, 1, 0};
-static Piece Active = PC_N;
+static int Offsets[PIECE_N][6] = {
+    0, -1, 0, 1, 1, -1, 0, -1, 0,  1, 1,  1, 0, 1, 1, 0, 1,  1, 0, -1, 0,
+    1, 0,  2, 0, 1, 1,  0, 1,  -1, 0, -1, 1, 0, 1, 1, 0, -1, 0, 1, 1,  0};
+static Piece Active = PIECE_N;
 static int Rows[4];
 static int Columns[4];
 static int NextColor = 1;
@@ -136,7 +145,7 @@ static void MovePiece(void) {
       IsGrounded(Rows[2], Columns[2]) || IsGrounded(Rows[3], Columns[3])) {
     SetColor(NextColor);
     NextColor = NextColor % MAX_COLOR + 1;
-    Active = PC_N;
+    Active = PIECE_N;
     int Lowest;
     int Highest;
     if (*Rows < Rows[1]) {
@@ -252,25 +261,25 @@ static void Play(void) {
         return;
       }
       case 'a': {
-        if (Active != PC_N) {
+        if (Active != PIECE_N) {
           MoveLeft();
         }
         break;
       }
       case 'd': {
-        if (Active != PC_N) {
+        if (Active != PIECE_N) {
           MoveRight();
         }
         break;
       }
       case 'w': {
-        if (Active != PC_N) {
+        if (Active != PIECE_N) {
           Rotate();
         }
         break;
       }
       case 's': {
-        if (Active == PC_N) {
+        if (Active == PIECE_N) {
           break;
         }
         MovePiece();
@@ -308,8 +317,8 @@ static void Play(void) {
         ++Before.tv_sec;
         Before.tv_nsec -= 1000000000 - Interval;
       }
-      if (Active == PC_N) {
-        if (CreatePiece(random() % PC_N)) {
+      if (Active == PIECE_N) {
+        if (CreatePiece(random() % PIECE_N)) {
           return;
         }
       } else {
@@ -351,7 +360,7 @@ int main(void) {
     NextColor = 1;
     Level = 1;
     Score = Lines = 0;
-    Active = PC_N;
+    Active = PIECE_N;
     memset(Game, 0, sizeof(Game));
   }
   return EXIT_SUCCESS;
