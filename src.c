@@ -8,7 +8,7 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
-#define PRINT(Str) fputs(Str, stdout)
+#define PRINT(...) fputs(__VA_ARGS__, stdout)
 #define WIDTH 10
 #define HEIGHT 20
 #define MAX_COLOR 14
